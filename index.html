@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Digital Classroom | Bilangan Desimal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#1769aa;--navy:#123b60;--pale:#eaf4fc;--ink:#243447;--muted:#718096;--line:#dce5ee;--bg:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#145b98,#2588c7);color:white;padding:25px max(20px,calc((100% - 1120px)/2));}
+header .top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+h1{font-size:clamp(24px,4vw,34px);margin:0 0 5px}header p{margin:0;color:#e6f3ff}
+main{max-width:1120px;margin:22px auto;padding:0 16px}.panel,.card{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 5px 18px #153e5e0a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.layout{display:grid;grid-template-columns:230px 1fr;gap:16px}
+nav{display:flex;flex-direction:column;gap:8px}.navbtn,button{border:0;border-radius:10px;padding:11px 14px;background:var(--blue);color:white;font-weight:650;cursor:pointer}
+.navbtn{background:white;color:var(--ink);text-align:left;border:1px solid var(--line)}.navbtn.active{background:var(--pale);color:var(--blue);border-color:#b8d9f2}
+button.secondary{background:#eaf1f7;color:#24445f}button.danger{background:#a83b43}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd8e3;border-radius:9px;margin:6px 0 13px;font:inherit}
+label{font-size:13px;font-weight:700;color:#41566b}h2{margin:0 0 15px;font-size:22px}h3{margin:0 0 8px}.muted,small{color:var(--muted)}.hidden{display:none!important}
+.stat{font-size:27px;font-weight:800;color:var(--blue)}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+.item{padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}
+.pill{display:inline-block;background:var(--pale);color:#145b98;padding:4px 9px;border-radius:30px;font-size:12px;font-weight:700}
+.notice{padding:12px;border-radius:10px;background:#fff7df;color:#765a13;margin:12px 0}.success{background:#e9f8ef;color:#17653a}
+.login{max-width:480px;margin:35px auto}.brand{font-weight:800;letter-spacing:.3px}
+footer{text-align:center;color:var(--muted);padding:28px}
+@media(max-width:700px){.layout{grid-template-columns:1fr}nav{display:grid;grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body>
+<header><div class="top"><div><div class="brand">DIGITAL CLASSROOM · FASE D</div><h1>Bilangan Desimal</h1><p>Kelas VII · Pengajar: Fqihan Fidin</p></div><div class="row" style="max-width:230px"><button class="secondary" id="musicBtn">♫ Musik: Mati</button></div></div></header>
+<main>
+<section id="setup" class="panel login">
+<h2>Hubungkan ruang kelas</h2><p class="muted">Masukkan URL dan anon key proyek Supabase milik pengajar. Pengaturan ini cukup dilakukan pada perangkat yang menyiapkan website.</p>
+<label>Supabase Project URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co">
+<label>Supabase anon/public key</label><textarea id="sbKey" rows="3" placeholder="Tempel anon key di sini"></textarea>
+<button id="connectBtn">Hubungkan</button><div id="setupMsg" class="muted"></div>
+</section>
+<section id="login" class="panel login hidden">
+<h2>Masuk ke room kelas</h2><p class="muted">Isi identitas dan kode akses yang diberikan pengajar.</p>
+<label>Nama lengkap</label><input id="personName" placeholder="Nama siswa / pengajar">
+<label>Kelas</label><input id="className" placeholder="Contoh: VII A">
+<label>Kode masuk</label><input id="accessCode" type="password" placeholder="Kode akses room">
+<button id="loginBtn">Masuk kelas</button><div id="loginMsg" class="muted"></div>
+</section>
+<section id="app" class="hidden">
+<div class="panel" style="margin-bottom:16px"><div class="row"><div><span class="pill" id="rolePill">ROOM KELAS</span><h2 id="welcome" style="margin:8px 0 2px">Selamat datang</h2><span class="muted">Room: Bilangan Desimal VII · Fase D</span></div><button class="secondary" id="logoutBtn" style="max-width:120px">Keluar</button></div></div>
+<div class="layout"><nav id="nav">
+<button class="navbtn active" data-page="home">⌂ Beranda</button>
+<button class="navbtn" data-page="materi">▤ Materi</button>
+<button class="navbtn" data-page="contoh">✎ Contoh soal</button>
+<button class="navbtn" data-page="latihan">◎ Latihan & evaluasi</button>
+<button class="navbtn" data-page="presensi">◷ Presensi</button>
+<button class="navbtn teacher-only" data-page="kelola">⚙ Kelola kelas</button>
+</nav><div class="panel">
+<div id="page-home" class="page"><h2>Selamat belajar!</h2><p>Pelajari bilangan desimal melalui materi, contoh, dan latihan interaktif.</p><div class="grid"><div class="card"><div class="stat">5</div><b>Pokok bahasan</b><p class="muted">Dari pengertian hingga penerapan.</p></div><div class="card"><div class="stat" id="attCount">—</div><b>Presensi tercatat</b><p class="muted">Jumlah catatan pada room.</p></div><div class="card"><div class="stat">VII</div><b>Fase D</b><p class="muted">Matematika kelas VII.</p></div></div><h3 style="margin-top:20px">Tujuan pembelajaran</h3><ul><li>Memahami makna dan nilai tempat bilangan desimal.</li><li>Membandingkan serta mengurutkan bilangan desimal.</li><li>Melakukan operasi hitung bilangan desimal.</li><li>Menyelesaikan masalah kontekstual yang melibatkan desimal.</li></ul></div>
+<div id="page-materi" class="page hidden"><h2>Materi pembelajaran</h2><div id="materials"></div><div class="teacher-only"><hr><h3>Tambah materi</h3><label>Judul materi</label><input id="matTitle"><label>Ringkasan / isi materi</label><textarea id="matBody" rows="3"></textarea><label>Link (opsional)</label><input id="matUrl" placeholder="https://..."><label>File (opsional)</label><input id="matFile" type="file"><button onclick="addContent('materi')">Simpan materi</button></div></div>
+<div id="page-contoh" class="page hidden"><h2>Contoh soal dan pembahasan</h2><div id="examples"></div><div class="teacher-only"><hr><h3>Tambah contoh soal</h3><label>Judul</label><input id="exTitle"><label>Soal dan pembahasan</label><textarea id="exBody" rows="4"></textarea><label>Link (opsional)</label><input id="exUrl"><label>File (opsional)</label><input id="exFile" type="file"><button onclick="addContent('contoh')">Simpan contoh soal</button></div></div>
+<div id="page-latihan" class="page hidden"><h2>Latihan dan evaluasi</h2><div id="tasks"></div><div class="teacher-only"><hr><h3>Tambah latihan/evaluasi</h3><label>Judul</label><input id="taskTitle"><label>Petunjuk / soal / tautan materi</label><textarea id="taskBody" rows="3"></textarea><label>Link (opsional)</label><input id="taskUrl"><label>File (opsional)</label><input id="taskFile" type="file"><button onclick="addContent('latihan')">Simpan latihan</button></div></div>
+<div id="page-presensi" class="page hidden"><h2>Presensi siswa</h2><p class="muted">Pilih status kehadiran untuk hari ini.</p><div id="studentAttendance"><button onclick="markAttendance('Hadir')">Hadir</button> <button class="secondary" onclick="markAttendance('Izin')">Izin</button> <button class="secondary" onclick="markAttendance('Sakit')">Sakit</button></div><div id="attendanceList" style="margin-top:18px"></div></div>
+<div id="page-kelola" class="page hidden"><h2>Kelola kelas</h2><p>Ringkasan room dan catatan presensi siswa.</p><div id="manageAttendance"></div><p class="notice">File yang diunggah disimpan pada bucket Supabase bernama <b>class-files</b>. Pastikan bucket dan kebijakan akses sudah dibuat sesuai panduan.</p></div>
+</div></div></section>
+</main><footer>Digital Classroom · Matematika Kelas VII Fase D</footer>
+<script>
+let sb=null, userProfile=null, currentPage='home';
+const ROOM='bilangan-desimal-vii';
+const $=id=>document.getElementById(id);
+function msg(id,t){$(id).textContent=t}
+$('connectBtn').onclick=async()=>{let u=$('sbUrl').value.trim(),k=$('sbKey').value.trim();if(!u||!k)return msg('setupMsg','URL dan anon key harus diisi.');try{sb=window.supabase.createClient(u,k);let {error}=await sb.auth.signInAnonymously();if(error)throw error;localStorage.setItem('dc_url',u);localStorage.setItem('dc_key',k);$('setup').classList.add('hidden');$('login').classList.remove('hidden')}catch(e){msg('setupMsg','Gagal terhubung: '+e.message)}};
+(async()=>{let u=localStorage.getItem('dc_url'),k=localStorage.getItem('dc_key');if(u&&k){$('sbUrl').value=u;$('sbKey').value=k;sb=window.supabase.createClient(u,k);let {data}=await sb.auth.getSession();if(data.session){$('setup').classList.add('hidden');$('login').classList.remove('hidden')}}})();
+$('loginBtn').onclick=async()=>{if(!sb)return msg('loginMsg','Hubungkan database terlebih dahulu.');let name=$('personName').value.trim(),klass=$('className').value.trim(),code=$('accessCode').value.trim();if(!name||!klass||!code)return msg('loginMsg','Nama, kelas, dan kode wajib diisi.');try{let {data,error}=await sb.rpc('join_decimal_room',{p_name:name,p_class:klass,p_code:code,p_room:ROOM});if(error)throw error;userProfile=data;$('login').classList.add('hidden');$('app').classList.remove('hidden');$('welcome').textContent='Halo, '+name+'!';$('rolePill').textContent=data.role==='teacher'?'PENGAJAR':'SISWA';document.querySelectorAll('.teacher-only').forEach(x=>x.classList.toggle('hidden',data.role!=='teacher'));$('studentAttendance').classList.toggle('hidden',data.role==='teacher');await refreshAll()}catch(e){msg('loginMsg','Tidak dapat masuk: '+e.message)}};
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+function showPage(p){currentPage=p;document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$('page-'+p).classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===p));if(p==='presensi'||p==='kelola')loadAttendance()};
+async function refreshAll(){await Promise.all([loadContent('materi'),loadContent('contoh'),loadContent('latihan'),loadAttendance()])}
+async function loadContent(kind){let {data,error}=await sb.from('class_content').select('*').eq('room_code',ROOM).eq('kind',kind).order('created_at',{ascending:false});if(error)return;let target=kind==='materi'?'materials':kind==='contoh'?'examples':'tasks';$(target).innerHTML='';(data||[]).forEach(x=>{let d=document.createElement('div');d.className='item';let h=document.createElement('h3');h.textContent=x.title;let p=document.createElement('p');p.textContent=x.body||'';d.append(h,p);if(x.file_url){let a=document.createElement('a');a.href=x.file_url;a.target='_blank';a.rel='noopener';a.textContent='Buka file';d.append(a)}if(x.link_url){let a=document.createElement('a');a.href=x.link_url;a.target='_blank';a.rel='noopener';a.textContent=(x.file_url?' · ':'')+'Buka tautan';d.append(a)}$(target).append(d)})}
+window.addContent=async kind=>{let prefix=kind==='materi'?'mat':kind==='contoh'?'ex':'task',title=$(prefix+'Title').value.trim(),body=$(prefix+'Body').value.trim(),url=$(prefix+'Url').value.trim(),file=$(prefix+'File').files[0];if(!title)return alert('Judul wajib diisi.');let file_url=null;if(file){let path=ROOM+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');let {error}=await sb.storage.from('class-files').upload(path,file);if(error)return alert('Upload gagal: '+error.message);let {data}=sb.storage.from('class-files').getPublicUrl(path);file_url=data.publicUrl}let {error}=await sb.from('class_content').insert({room_code:ROOM,kind,title,body,link_url:url||null,file_url,created_by:userProfile.id});if(error)return alert(error.message);alert('Konten tersimpan.');await loadContent(kind)};
+window.markAttendance=async status=>{let today=new Date().toISOString().slice(0,10);let {error}=await sb.from('attendance').upsert({room_code:ROOM,student_id:userProfile.id,attendance_date:today,status},{onConflict:'student_id,attendance_date'});if(error)return alert(error.message);alert('Presensi '+status+' tersimpan.');loadAttendance()};
+async function loadAttendance(){let {data,error}=await sb.from('attendance').select('*, profiles(full_name,class_name)').eq('room_code',ROOM).order('attendance_date',{ascending:false});if(error)return;let html=(data||[]).map(a=>`<div class="item"><b>${esc(a.profiles?.full_name||'Siswa')}</b> · ${esc(a.profiles?.class_name||'')}<br><span class="muted">${a.attendance_date} — ${esc(a.status)}</span></div>`).join('')||'<p class="muted">Belum ada presensi.</p>';if(userProfile?.role==='teacher')$('manageAttendance').innerHTML=html;$('attendanceList').innerHTML=html;$('attCount').textContent=(data||[]).length}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+let audioCtx=null,osc=null,music=false;$('musicBtn').onclick=()=>{try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(!music){osc=audioCtx.createOscillator();let gain=audioCtx.createGain();osc.type='sine';osc.frequency.value=220;gain.gain.value=.025;osc.connect(gain);gain.connect(audioCtx.destination);osc.start();music=true;$('musicBtn').textContent='♫ Musik: Nyala'}else{osc.stop();osc=null;music=false;$('musicBtn').textContent='♫ Musik: Mati'}}catch(e){alert('Audio tidak tersedia pada browser ini.')}};
+</script></body></html>
